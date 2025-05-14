@@ -1,0 +1,1048 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Password Generator</title>
+    <link rel="icon" type="image/png" href="assets/favicon.png" />
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-hover: #4f46e5;
+            --background: #f9fafb;
+            --foreground: #1f2937;
+            --card: #ffffff;
+            --card-foreground: #1f2937;
+            --border: #e5e7eb;
+            --input: #e5e7eb;
+            --ring: #6366f1;
+            --radius: 0.5rem;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--background);
+            color: var(--foreground);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+
+
+        .content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 2rem;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+        }
+
+        .password-generator {
+            background-color: var(--card);
+            border-radius: var(--radius);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 600px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .tab {
+            padding: 1rem 1.5rem;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            background: transparent;
+            border: none;
+            color: var(--foreground);
+            position: relative;
+        }
+
+        .tab.active {
+            color: var(--primary);
+        }
+
+        .tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background-color: var(--primary);
+            animation: slideIn 0.3s ease forwards;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: scaleX(0);
+            }
+
+            to {
+                transform: scaleX(1);
+            }
+        }
+
+        .tab-content {
+            padding: 1.5rem;
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .passwords-display {
+            margin-bottom: 1.5rem;
+        }
+
+        .password {
+            background-color: var(--background);
+            padding: 0.75rem 1rem;
+            border-radius: var(--radius);
+            margin-bottom: 0.75rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s ease;
+            border: 1px solid var(--border);
+        }
+
+        .password:hover {
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .copy-btn {
+            background-color: transparent;
+            color: var(--primary);
+            border: none;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: var(--radius);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .copy-btn:hover {
+            background-color: rgba(99, 102, 241, 0.1);
+        }
+
+        .copy-btn svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        .generate-btn {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: var(--radius);
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 1.5rem;
+            width: 100%;
+        }
+
+        .generate-btn:hover {
+            background-color: var(--primary-hover);
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+
+        .option {
+            margin-bottom: 1rem;
+        }
+
+        .option.full-width {
+            grid-column: span 2;
+        }
+
+        .option-label {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .checkbox-wrapper {
+            display: flex;
+            align-items: center;
+        }
+
+        .checkbox {
+            appearance: none;
+            width: 22px;
+            height: 22px;
+            border: 2px solid var(--border);
+            border-radius: 4px;
+            margin-right: 0.5rem;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .checkbox:checked {
+            background-color: var(--primary);
+            border-color: var(--primary);
+        }
+
+        .checkbox:checked::after {
+            content: '';
+            position: absolute;
+            left: 5px;
+            top: 2px;
+            width: 6px;
+            height: 10px;
+            border: solid white;
+            border-width: 0 2px 2px 0;
+            transform: rotate(45deg);
+        }
+
+        .range-input {
+            width: 100%;
+            -webkit-appearance: none;
+            height: 6px;
+            background: var(--input);
+            border-radius: 10px;
+            margin-top: 0.5rem;
+        }
+
+        .range-input::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            background: var(--primary);
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .range-input::-webkit-slider-thumb:hover {
+            transform: scale(1.1);
+        }
+
+        .range-value {
+            margin-left: 1rem;
+            font-weight: 500;
+        }
+
+        .history-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .history-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem;
+            border-bottom: 1px solid var(--border);
+            animation: slideInDown 0.3s ease;
+        }
+
+        @keyframes slideInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .history-actions {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 1rem;
+        }
+
+        .clear-btn {
+            background-color: #ef4444;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius);
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .clear-btn:hover {
+            background-color: #dc2626;
+        }
+
+        .toggle-history-btn {
+            background-color: transparent;
+            color: var(--foreground);
+            border: 1px solid var(--border);
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius);
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .toggle-history-btn:hover {
+            background-color: var(--background);
+        }
+
+        .remove-btn {
+            background-color: transparent;
+            color: #ef4444;
+            border: none;
+            cursor: pointer;
+            padding: 0.25rem;
+            border-radius: var(--radius);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+
+        .remove-btn:hover {
+            background-color: rgba(239, 68, 68, 0.1);
+        }
+
+        .remove-btn svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        .password-text {
+            font-family: monospace;
+            word-break: break-all;
+        }
+
+        .copied-toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: var(--foreground);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: var(--radius);
+            font-size: 0.875rem;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+
+        .copied-toast.show {
+            opacity: 1;
+            animation: fadeInOut 2s ease;
+        }
+
+        @keyframes fadeInOut {
+            0% {
+                opacity: 0;
+            }
+
+            20% {
+                opacity: 1;
+            }
+
+            80% {
+                opacity: 1;
+            }
+
+            100% {
+                opacity: 0;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+
+            .ad-left {
+                width: 100%;
+                height: 90px;
+                border-right: none;
+                border-bottom: 1px solid var(--border);
+            }
+
+            .options-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .option {
+                grid-column: span 1 !important;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+
+        <div class="content">
+
+            <div class="main-content">
+                <div class="password-generator">
+                    <div class="tabs">
+                        <button class="tab active" data-tab="basic">Basic</button>
+                        <button class="tab" data-tab="advanced">Advanced</button>
+                        <button class="tab" data-tab="history">History</button>
+                    </div>
+
+                    <div class="tab-content active" id="basic">
+                        <div class="passwords-display" id="basic-passwords">
+                            <!-- Passwords will be generated here -->
+                        </div>
+
+                        <button class="generate-btn" id="basic-generate">Generate Passwords</button>
+
+                        <div class="options-grid">
+                            <div class="option full-width">
+                                <div class="option-label">
+                                    Password Length: <span class="range-value" id="basic-length-value">12</span>
+                                </div>
+                                <input type="range" class="range-input" id="basic-length" min="4" max="32" value="12">
+                            </div>
+
+                            <div class="option">
+                                <label class="checkbox-wrapper">
+                                    <input type="checkbox" class="checkbox" id="basic-uppercase" checked>
+                                    Include Uppercase
+                                </label>
+                            </div>
+
+                            <div class="option">
+                                <label class="checkbox-wrapper">
+                                    <input type="checkbox" class="checkbox" id="basic-lowercase" checked>
+                                    Include Lowercase
+                                </label>
+                            </div>
+
+                            <div class="option">
+                                <label class="checkbox-wrapper">
+                                    <input type="checkbox" class="checkbox" id="basic-numbers" checked>
+                                    Include Numbers
+                                </label>
+                            </div>
+
+                            <div class="option">
+                                <label class="checkbox-wrapper">
+                                    <input type="checkbox" class="checkbox" id="basic-special" checked>
+                                    Special Characters
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="tab-content" id="advanced">
+                        <div class="passwords-display" id="advanced-passwords">
+                            <!-- Passwords will be generated here -->
+                        </div>
+
+                        <button class="generate-btn" id="advanced-generate">Generate Passwords</button>
+
+                        <div class="options-grid">
+                            <div class="option full-width">
+                                <div class="option-label">
+                                    Minimum Length: <span class="range-value" id="advanced-min-length-value">8</span>
+                                </div>
+                                <input type="range" class="range-input" id="advanced-min-length" min="4" max="32"
+                                    value="8">
+                            </div>
+
+                            <div class="option full-width">
+                                <div class="option-label">
+                                    Maximum Length: <span class="range-value" id="advanced-max-length-value">16</span>
+                                </div>
+                                <input type="range" class="range-input" id="advanced-max-length" min="4" max="32"
+                                    value="16">
+                            </div>
+
+                            <div class="option">
+                                <label class="checkbox-wrapper">
+                                    <input type="checkbox" class="checkbox" id="advanced-uppercase" checked>
+                                    Include Uppercase
+                                </label>
+                            </div>
+
+                            <div class="option">
+                                <label class="checkbox-wrapper">
+                                    <input type="checkbox" class="checkbox" id="advanced-lowercase" checked>
+                                    Include Lowercase
+                                </label>
+                            </div>
+
+                            <div class="option">
+                                <label class="checkbox-wrapper">
+                                    <input type="checkbox" class="checkbox" id="advanced-numbers" checked>
+                                    Include Numbers
+                                </label>
+                            </div>
+
+                            <div class="option">
+                                <label class="checkbox-wrapper">
+                                    <input type="checkbox" class="checkbox" id="advanced-special" checked>
+                                    Special Characters
+                                </label>
+                            </div>
+
+                            <div class="option full-width">
+                                <label class="checkbox-wrapper">
+                                    <input type="checkbox" class="checkbox" id="advanced-exclude-similar" checked>
+                                    Exclude Similar Characters (i, l, 1, L, o, 0, O)
+                                </label>
+                            </div>
+
+                            <div class="option full-width">
+                                <label class="checkbox-wrapper">
+                                    <input type="checkbox" class="checkbox" id="advanced-exclude-ambiguous">
+                                    Exclude Ambiguous Characters ({ } [ ] ( ) / \ ' " ` ~ , ; : . <>)
+                                </label>
+                            </div>
+
+                            <div class="option full-width">
+                                <label class="checkbox-wrapper">
+                                    <input type="checkbox" class="checkbox" id="advanced-avoid-patterns" checked>
+                                    Avoid Common Patterns (1234, abcd, qwerty)
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="tab-content" id="history">
+                        <div class="history-list" id="password-history">
+                            <!-- Password history will be shown here -->
+                        </div>
+
+                        <div class="history-actions">
+                            <button class="clear-btn" id="clear-history">Clear History</button>
+                            <button class="toggle-history-btn" id="toggle-history-storage">
+                                <span id="history-storage-text">Disable Storage</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="copied-toast" id="copied-toast">Password copied to clipboard!</div>
+
+    <script>
+        // DOM Elements
+        const tabs = document.querySelectorAll('.tab');
+        const tabContents = document.querySelectorAll('.tab-content');
+        const basicPasswordsDisplay = document.getElementById('basic-passwords');
+        const advancedPasswordsDisplay = document.getElementById('advanced-passwords');
+        const basicGenerateBtn = document.getElementById('basic-generate');
+        const advancedGenerateBtn = document.getElementById('advanced-generate');
+        const basicLengthSlider = document.getElementById('basic-length');
+        const basicLengthValue = document.getElementById('basic-length-value');
+        const advancedMinLengthSlider = document.getElementById('advanced-min-length');
+        const advancedMinLengthValue = document.getElementById('advanced-min-length-value');
+        const advancedMaxLengthSlider = document.getElementById('advanced-max-length');
+        const advancedMaxLengthValue = document.getElementById('advanced-max-length-value');
+        const passwordHistoryList = document.getElementById('password-history');
+        const clearHistoryBtn = document.getElementById('clear-history');
+        const toggleHistoryBtn = document.getElementById('toggle-history-storage');
+        const toggleHistoryText = document.getElementById('history-storage-text');
+        const copiedToast = document.getElementById('copied-toast');
+
+        // State management
+        let currentTab = 'basic';
+        let storeHistory = true;
+        let passwordHistory = [];
+
+        // Character sets
+        const charSets = {
+            uppercase: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
+            lowercase: 'abcdefghijklmnopqrstuvwxyz',
+            numbers: '0123456789',
+            special: '!@#$%^&*_-+=',
+            ambiguous: '{}[]()/\\\'"`~,;:.<>'
+        };
+
+        const similarChars = 'il1Lo0O';
+        const commonPatterns = ['1234', '2345', '3456', '4567', '5678', '6789', 'abcd', 'qwer', 'asdf', 'zxcv', 'qwerty'];
+
+        // Load saved settings
+        function loadSettings() {
+            const savedTab = localStorage.getItem('currentTab');
+            const savedHistory = localStorage.getItem('passwordHistory');
+            const historyEnabled = localStorage.getItem('storeHistory');
+
+            if (savedTab) {
+                currentTab = savedTab;
+                tabs.forEach(tab => {
+                    if (tab.dataset.tab === currentTab) {
+                        tab.classList.add('active');
+                    } else {
+                        tab.classList.remove('active');
+                    }
+                });
+
+                tabContents.forEach(content => {
+                    if (content.id === currentTab) {
+                        content.classList.add('active');
+                    } else {
+                        content.classList.remove('active');
+                    }
+                });
+            }
+
+            if (savedHistory) {
+                try {
+                    const parsed = JSON.parse(savedHistory);
+                    passwordHistory = Array.isArray(parsed) && typeof parsed[0] === 'object'
+                        ? parsed
+                        : parsed.map(p => ({ password: p, timestamp: new Date().toLocaleString() }));
+                    updateHistoryDisplay();
+                } catch (e) {
+                    console.error('Error loading password history', e);
+                    passwordHistory = [];
+                }
+            }
+
+            if (historyEnabled !== null) {
+                storeHistory = historyEnabled === 'true';
+                toggleHistoryText.textContent = storeHistory ? 'Disable Storage' : 'Enable Storage';
+            }
+
+            // Load Basic tab settings
+            const basicSettings = JSON.parse(localStorage.getItem('basicSettings') || '{}');
+            if (basicSettings.length) basicLengthSlider.value = basicSettings.length;
+            if (basicSettings.uppercase !== undefined) document.getElementById('basic-uppercase').checked = basicSettings.uppercase;
+            if (basicSettings.lowercase !== undefined) document.getElementById('basic-lowercase').checked = basicSettings.lowercase;
+            if (basicSettings.numbers !== undefined) document.getElementById('basic-numbers').checked = basicSettings.numbers;
+            if (basicSettings.special !== undefined) document.getElementById('basic-special').checked = basicSettings.special;
+            basicLengthValue.textContent = basicLengthSlider.value;
+
+            // Load Advanced tab settings
+            const advancedSettings = JSON.parse(localStorage.getItem('advancedSettings') || '{}');
+            if (advancedSettings.minLength) advancedMinLengthSlider.value = advancedSettings.minLength;
+            if (advancedSettings.maxLength) advancedMaxLengthSlider.value = advancedSettings.maxLength;
+            if (advancedSettings.uppercase !== undefined) document.getElementById('advanced-uppercase').checked = advancedSettings.uppercase;
+            if (advancedSettings.lowercase !== undefined) document.getElementById('advanced-lowercase').checked = advancedSettings.lowercase;
+            if (advancedSettings.numbers !== undefined) document.getElementById('advanced-numbers').checked = advancedSettings.numbers;
+            if (advancedSettings.special !== undefined) document.getElementById('advanced-special').checked = advancedSettings.special;
+            if (advancedSettings.excludeSimilar !== undefined) document.getElementById('advanced-exclude-similar').checked = advancedSettings.excludeSimilar;
+            if (advancedSettings.excludeAmbiguous !== undefined) document.getElementById('advanced-exclude-ambiguous').checked = advancedSettings.excludeAmbiguous;
+            if (advancedSettings.avoidPatterns !== undefined) document.getElementById('advanced-avoid-patterns').checked = advancedSettings.avoidPatterns;
+            advancedMinLengthValue.textContent = advancedMinLengthSlider.value;
+            advancedMaxLengthValue.textContent = advancedMaxLengthSlider.value;
+        }
+
+        // Save settings
+        function saveSettings() {
+            localStorage.setItem('currentTab', currentTab);
+            localStorage.setItem('storeHistory', storeHistory);
+
+            if (storeHistory) {
+                localStorage.setItem('passwordHistory', JSON.stringify(passwordHistory));
+            }
+
+            // Save Basic tab settings
+            const basicSettings = {
+                length: basicLengthSlider.value,
+                uppercase: document.getElementById('basic-uppercase').checked,
+                lowercase: document.getElementById('basic-lowercase').checked,
+                numbers: document.getElementById('basic-numbers').checked,
+                special: document.getElementById('basic-special').checked
+            };
+            localStorage.setItem('basicSettings', JSON.stringify(basicSettings));
+
+            // Save Advanced tab settings
+            const advancedSettings = {
+                minLength: advancedMinLengthSlider.value,
+                maxLength: advancedMaxLengthSlider.value,
+                uppercase: document.getElementById('advanced-uppercase').checked,
+                lowercase: document.getElementById('advanced-lowercase').checked,
+                numbers: document.getElementById('advanced-numbers').checked,
+                special: document.getElementById('advanced-special').checked,
+                excludeSimilar: document.getElementById('advanced-exclude-similar').checked,
+                excludeAmbiguous: document.getElementById('advanced-exclude-ambiguous').checked,
+                avoidPatterns: document.getElementById('advanced-avoid-patterns').checked
+            };
+            localStorage.setItem('advancedSettings', JSON.stringify(advancedSettings));
+        }
+
+        // Generate a basic password
+        function generateBasicPassword() {
+            const length = parseInt(basicLengthSlider.value);
+            const includeUppercase = document.getElementById('basic-uppercase').checked;
+            const includeLowercase = document.getElementById('basic-lowercase').checked;
+            const includeNumbers = document.getElementById('basic-numbers').checked;
+            const includeSpecial = document.getElementById('basic-special').checked;
+
+            let chars = '';
+            if (includeUppercase) chars += charSets.uppercase;
+            if (includeLowercase) chars += charSets.lowercase;
+            if (includeNumbers) chars += charSets.numbers;
+            if (includeSpecial) chars += charSets.special;
+
+            if (chars === '') {
+                // Default to lowercase if nothing is selected
+                chars = charSets.lowercase;
+            }
+
+            let password = '';
+            for (let i = 0; i < length; i++) {
+                const randomIndex = Math.floor(Math.random() * chars.length);
+                password += chars[randomIndex];
+            }
+
+            return password;
+        }
+
+        // Generate an advanced password
+        function generateAdvancedPassword() {
+            const minLength = parseInt(advancedMinLengthSlider.value);
+            const maxLength = parseInt(advancedMaxLengthSlider.value);
+            const includeUppercase = document.getElementById('advanced-uppercase').checked;
+            const includeLowercase = document.getElementById('advanced-lowercase').checked;
+            const includeNumbers = document.getElementById('advanced-numbers').checked;
+            const includeSpecial = document.getElementById('advanced-special').checked;
+            const excludeSimilar = document.getElementById('advanced-exclude-similar').checked;
+            const excludeAmbiguous = document.getElementById('advanced-exclude-ambiguous').checked;
+            const avoidPatterns = document.getElementById('advanced-avoid-patterns').checked;
+
+            // Ensure min <= max
+            if (minLength > maxLength) {
+                advancedMinLengthSlider.value = maxLength;
+                advancedMinLengthValue.textContent = maxLength;
+            }
+
+            let chars = '';
+            if (includeUppercase) chars += charSets.uppercase;
+            if (includeLowercase) chars += charSets.lowercase;
+            if (includeNumbers) chars += charSets.numbers;
+            if (includeSpecial) chars += charSets.special;
+
+            if (chars === '') {
+                // Default to lowercase if nothing is selected
+                chars = charSets.lowercase;
+            }
+
+            // Remove similar chars if needed
+            if (excludeSimilar) {
+                for (const char of similarChars) {
+                    chars = chars.replace(char, '');
+                }
+            }
+
+            // Remove ambiguous chars if needed
+            if (excludeAmbiguous) {
+                for (const char of charSets.ambiguous) {
+                    chars = chars.replace(char, '');
+                }
+            }
+
+            // Generate random length between min and max
+            const length = Math.floor(Math.random() * (maxLength - minLength + 1)) + minLength;
+
+            let password = '';
+            let attempts = 0;
+            const maxAttempts = 100; // Prevent infinite loop
+
+            while (attempts < maxAttempts) {
+                password = '';
+                for (let i = 0; i < length; i++) {
+                    const randomIndex = Math.floor(Math.random() * chars.length);
+                    password += chars[randomIndex];
+                }
+
+                // Check for patterns if needed
+                if (avoidPatterns) {
+                    let hasPattern = false;
+                    for (const pattern of commonPatterns) {
+                        if (password.toLowerCase().includes(pattern)) {
+                            hasPattern = true;
+                            break;
+                        }
+                    }
+
+                    if (!hasPattern) {
+                        break; // Valid password
+                    }
+                } else {
+                    break; // Valid password
+                }
+
+                attempts++;
+            }
+
+            return password;
+        }
+
+        // Display passwords in the UI
+        function displayPasswords(mode) {
+            const display = mode === 'basic' ? basicPasswordsDisplay : advancedPasswordsDisplay;
+            const generateFunc = mode === 'basic' ? generateBasicPassword : generateAdvancedPassword;
+
+            display.innerHTML = '';
+
+            for (let i = 0; i < 3; i++) {
+                const password = generateFunc();
+                const passwordElement = document.createElement('div');
+                passwordElement.className = 'password';
+                passwordElement.innerHTML = `
+                    <span class="password-text">${password}</span>
+                    <button class="copy-btn" data-password="${password}">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                        </svg>
+                    </button>
+                `;
+                display.appendChild(passwordElement);
+            }
+
+            // Add event listeners for copy buttons
+            const copyButtons = display.querySelectorAll('.copy-btn');
+            copyButtons.forEach(btn => {
+                btn.addEventListener('click', function () {
+                    const password = this.dataset.password;
+                    copyToClipboard(password);
+
+                    // Add to history if enabled
+                    if (storeHistory) {
+                        addToHistory(password);
+                    }
+                });
+            });
+        }
+
+        // Copy password to clipboard
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                showCopiedToast();
+            }).catch(err => {
+                console.error('Could not copy text: ', err);
+            });
+        }
+
+        // Show copied toast notification
+        function showCopiedToast() {
+            copiedToast.classList.add('show');
+            setTimeout(() => {
+                copiedToast.classList.remove('show');
+            }, 2000);
+        }
+
+        // Event Listeners
+
+        // Tab switching
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                const tabName = tab.dataset.tab;
+
+                // Update active tab
+                tabs.forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+
+                // Update active content
+                tabContents.forEach(content => {
+                    if (content.id === tabName) {
+                        content.classList.add('active');
+                    } else {
+                        content.classList.remove('active');
+                    }
+                });
+
+                currentTab = tabName;
+                saveSettings();
+            });
+        });
+
+        // Range input updates
+        basicLengthSlider.addEventListener('input', () => {
+            basicLengthValue.textContent = basicLengthSlider.value;
+            saveSettings();
+        });
+
+        advancedMinLengthSlider.addEventListener('input', () => {
+            advancedMinLengthValue.textContent = advancedMinLengthSlider.value;
+
+            // Ensure min <= max
+            if (parseInt(advancedMinLengthSlider.value) > parseInt(advancedMaxLengthSlider.value)) {
+                advancedMaxLengthSlider.value = advancedMinLengthSlider.value;
+                advancedMaxLengthValue.textContent = advancedMaxLengthSlider.value;
+            }
+
+            saveSettings();
+        });
+
+        advancedMaxLengthSlider.addEventListener('input', () => {
+            advancedMaxLengthValue.textContent = advancedMaxLengthSlider.value;
+
+            // Ensure min <= max
+            if (parseInt(advancedMaxLengthSlider.value) < parseInt(advancedMinLengthSlider.value)) {
+                advancedMinLengthSlider.value = advancedMaxLengthSlider.value;
+                advancedMinLengthValue.textContent = advancedMinLengthSlider.value;
+            }
+
+            saveSettings();
+        });
+
+        // Checkbox changes
+        document.querySelectorAll('.checkbox').forEach(checkbox => {
+            checkbox.addEventListener('change', saveSettings);
+        });
+
+        // Generate buttons
+        basicGenerateBtn.addEventListener('click', () => {
+            displayPasswords('basic');
+        });
+
+        advancedGenerateBtn.addEventListener('click', () => {
+            displayPasswords('advanced');
+        });
+
+        // Clear history button
+        clearHistoryBtn.addEventListener('click', clearHistory);
+
+        // Toggle history storage button
+        toggleHistoryBtn.addEventListener('click', toggleHistoryStorage);
+
+        // Initialize
+        window.addEventListener('DOMContentLoaded', () => {
+            loadSettings();
+            displayPasswords('basic');
+            displayPasswords('advanced');
+        });
+
+
+
+        // Add a new password to history
+        function addToHistory(password) {
+            const now = new Date();
+            const timestamp = now.toLocaleString('en-IN', {
+                weekday: 'short', year: 'numeric', month: 'short',
+                day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit'
+            });
+
+            const entry = { password, timestamp };
+
+            // Avoid duplicates
+            if (!passwordHistory.some(p => p.password === password)) {
+                passwordHistory.unshift(entry);
+                if (passwordHistory.length > 100) passwordHistory.pop();
+                updateHistoryDisplay();
+                saveSettings();
+            }
+        }
+
+        // Update the UI for password history
+        function updateHistoryDisplay() {
+            passwordHistoryList.innerHTML = '';
+            passwordHistory.forEach((entry, index) => {
+                const { password, timestamp } = entry;
+
+                const item = document.createElement('div');
+                item.className = 'history-item';
+                item.innerHTML = `
+            <div style="display:flex; flex-direction: column; width:100%;">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div class="password-text">${password}</div>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <button class="copy-btn" data-password="${password}">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                            </svg>
+                        </button>
+                        <button class="remove-btn" data-index="${index}">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="18" y1="6" x2="6" y2="18"></line>
+                                <line x1="6" y1="6" x2="18" y2="18"></line>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                <small style="margin-top: 5px; color: gray;">🕓 ${timestamp}</small>
+            </div>
+        `;
+                passwordHistoryList.appendChild(item);
+            });
+
+            // Setup copy events
+            passwordHistoryList.querySelectorAll('.copy-btn').forEach(btn => {
+                btn.addEventListener('click', function () {
+                    copyToClipboard(this.dataset.password);
+                });
+            });
+
+            // Setup remove events
+            passwordHistoryList.querySelectorAll('.remove-btn').forEach(btn => {
+                btn.addEventListener('click', function () {
+                    const index = parseInt(this.dataset.index);
+                    if (!isNaN(index)) {
+                        passwordHistory.splice(index, 1);
+                        updateHistoryDisplay();
+                        saveSettings();
+                    }
+                });
+            });
+        }
+
+        // Clear the entire password history
+        function clearHistory() {
+            passwordHistory = [];
+            updateHistoryDisplay();
+            saveSettings();
+
+        }
+
+        // Toggle storing history in localStorage
+        function toggleHistoryStorage() {
+            storeHistory = !storeHistory;
+            toggleHistoryText.textContent = storeHistory ? 'Disable Storage' : 'Enable Storage';
+            saveSettings();
+        }
+    </script>
